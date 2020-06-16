@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Felicia's Math</title>
+<style>
+    body {
+        background-color: rgb(201, 245, 255) ;
+        text-align: center;
+    }
+    h1{
+        font-family:'Courier New', Courier, monospace;
+        text-align: center;
+    }
+    p{
+        font-family:'Courier New', Courier, monospace;
+        font-size: 25px;
+    }
+    select{
+        border:3px solid black;
+        border-radius:  6px;
+        padding: 5px;
+        font-size: 20px;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    input{
+        font-family:'Courier New', Courier, monospace;
+        border: 2px;
+        border-color:  rgb(1, 4, 61);
+        border-style:groove;
+        border-radius:  6px;
+        padding: 5px;
+        margin: 5px 5px 10px 0px;    
+        font-size: 20px;
+        }
+    table, th, td {
+        text-align: center;
+        vertical-align: middle;
+        border-radius: 2px;
+        padding: 10px;
+    }
+    th, td{
+        border:1px solid black;
+    }
+    table{
+        font-family:'Courier New', Courier, monospace;
+        width: 100%;
+        border:3px solid black;
+        border-collapse: collapse;
+        background-color: rgb(202, 226, 255);
+    }
+    #question,#equalsign {
+        font-family:'Courier New', Courier, monospace;
+        font-size: 54px;
+        text-align:center;
+    }
+    #Restart {
+        margin-top: 10px;
+    }
+    #yourAnswer{
+        text-align: right;
+    }
+    input[type= button]  {
+        background-color:rgb(255, 215, 248);
+        }
+</style>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script>
+    var QuestionCounter = 1
+    var Problem = Addition
+    var state="INIT"
+    let CorrectAnswers = 0
+    let AllOperations = [Addition, Subtraction, Multiplication, Division]
+    let timerHandle
+
+    function resetTimer() {
+        // Set the date we're counting down to
+        var countDownDate = new Date();
+        countDownDate.setSeconds(countDownDate.getSeconds() + 5);
+
+
+        // Update the count down every 1 second
+        timerHandle = setInterval(function() {
+            // Get today's date and time
+            var now = new Date().getTime();
+                
+            // Find the distance between now and the count down date
+            var distance = countDownDate - now;
+                
+            // Time calculations for days, hours, minutes and seconds
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+            // Output the result in an element with id="demo"
+            document.getElementById("demo").innerHTML = seconds + "s ";
+                
+            // If the count down is over, write some text 
+            if (distance < 0) {
+                onNext()
+                document.getElementById("demo").innerHTML = "Time's up!";
+            }
+        }, 1000);
+    }
+
+    function onNext() {
+        $("#yourAnswer").focus()
+        clearInterval(timerHandle);
+        var yourAnswer = $("#yourAnswer").val();
+        const GoodMessage = ["","Good job!", "Great Work!", "Fantastic!", "Awesome!", "Keep it up!", "You did it!", "Amazing!", "You're a genius!", "Doing Great!", "Well Done!"]
+        var question = $("#question").text();
+        var result = parseInt(eval(question)) == parseInt(yourAnswer) ?  GoodMessage[ Math.ceil(Math.random() * 10)]: "Oops! The correct answer is " + parseInt(eval(question)) + "!"
+        if (parseInt(eval(question)) == parseInt(yourAnswer)) {
+            CorrectAnswers+=1
+        }
+        console.log(CorrectAnswers)
+        var markup = "<tr><td>" + QuestionCounter + "</td><td>" + question + "</td><td>" + yourAnswer + "</td><td>" + result + "</td></tr>";
+
+        $("table tbody").append(markup);
+        if (parseInt(eval(question)) == parseInt(yourAnswer)){
+            console.log(CorrectAnswers) 
+        }
+        let score = "Score:" + CorrectAnswers + "/" + QuestionCounter
+        document.getElementById("score").innerHTML = score;
+        QuestionCounter += 1
+        generateQuestion()
+        resetTimer()
+    };
+
+    function Restart() {
+        clearInterval(timerHandle);
+        console.log("Restart function called")
+        $(".startPane").show()
+        $(".problemPane").hide()
+        $(".reportPane").hide()
+        $("tbody").empty();
+        $("#Title").show()
+        QuestionCounter = 1
+        CorrectAnswers = 0
+        score = "Score:  "
+    }
+
+
+    function generateQuestion() {
+        let question = Problem()
+        $("#question").html(question)
+        $("#yourAnswer").val("")
+    }
+    
+    function Initialize(){
+        Restart()
+
+        $("#Start").click(function() {
+            $("#yourAnswer").focus()
+            $(".startPane").hide()
+            $(".problemPane").show()
+            $(".reportPane").show()
+            $("#Title").hide()
+            var selectedOperator = $("#selectOperator").children("option:selected").val();
+            switch(selectedOperator) {
+                case "Addition": 
+                    Problem = Addition
+                    break
+
+                case "Subtraction": 
+                    Problem = Subtraction
+                    break
+                case "Multiplication": 
+                    Problem = Multiplication
+                    break
+                case "Division": 
+                    Problem = Division
+                    break
+                case "All": 
+                    Problem = All
+                    break
+            }
+            QuestionCounter = 1
+            CorrectAnswers = 0
+            score = 'Score: '
+            document.getElementById("score").innerHTML = score;
+            generateQuestion()
+            resetTimer()
+            score = "Score:  "
+            $("#yourAnswer").focus()
+        })
+
+        $(document).keypress(function(e) {
+            if(e.which == 13) {
+                console.log("Enter Key pressed")
+                onNext()
+            }
+        });
+
+        $("#Next").click(() => onNext())
+        $("#Restart").click(() => Restart())
+    }
+
+
+    function Addition(){
+        return Math.ceil(Math.random() * 10) + "+" + Math.ceil(Math.random() * 10)
+    }
+    function Subtraction(){
+        let FirstNumber = Math.ceil(Math.random() * 10)
+        return FirstNumber + "-" + Math.floor(Math.random() * FirstNumber)
+    }
+    function Multiplication(){
+        return Math.ceil(Math.random() * 10) + "*" + Math.ceil(Math.random() * 10)
+    }
+    function Division(){
+        let operator = "/"
+        let divisor = Math.ceil(Math.random() * 10)
+        let quotient = Math.ceil(Math.random() * 10)
+        let dividend = divisor * quotient
+        return dividend + "/" + divisor 
+    }
+
+    function All(){
+        return AllOperations[Math.floor(Math.random() * 4)]()
+    }
+     
+    $(document).ready(function(){
+        Initialize()
+    });
+    
+</script>
+</head>
+<body>
+    <div id = "Title">
+    <h1><u>Math Practice</u></h1>
+    </div>
+        <div class="startPane">
+            <p>What would you like to practice?</p>
+            <select id="selectOperator">
+                <option id="optionAddition" value="Addition">Addition</option>
+                <option id="optionSubtraction" value="Subtraction">Subtraction</option>
+                <option id="optionMultiplication" value="Multiplication">Multiplication</option>
+                <option id="optionDivision" value="Division">Division</option>
+                <option id="optionAll" value="All">All</option>
+            </select>
+            <input type="button" value="Start" id="Start">
+        </div>
+        <div class="problemPane">
+            <p id = "score"></p>
+            <label id="question"></label>
+            <label id= equalsign>=</label><br>
+            <input type="number" id="yourAnswer" placeholder="Enter Answer here:" autocomplete="off" autofocus>
+            <input type="button" value="Next" id="Next"><br>
+            <p id="demo"></p><br>
+        </div>
+    <div class="reportPane">
+        <table id="table">
+            <thead>
+                <tr>
+                    <th id = "ProblemNumberCol" width= 15%>Problem Number</th>
+                    <th id = "QuestionCol" width= 30%>Question</th>
+                    <th id = "AnswerCol" width= 15%>Answer</th>
+                    <th id = "ResultCol" width= 30%>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <input type="button" value="Restart" id="Restart">
+    </div>
+</body> 
+</html>
